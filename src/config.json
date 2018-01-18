@@ -1,5 +1,12 @@
 {
 	"port": 8080,
 	"bodyLimit": "100kb",
-	"corsHeaders": ["Link"]
+	"corsHeaders": ["Link"],
+  "URL_DEV": "localhost",
+  "PORT_DEV": 8080,
+  "URL_PROD": "htpps://mp3-to-itunes.com",
+  "PORT_PROD": 80,
+  "PERCENTAGE_ACCEPTED": 0.5,
+  "EXTENSION_ACCEPTED": ["mp3", "m4a"],
+  "LAST_FM_API_KEY": "1db51c18e8472f58f4d431f8467cee00"
 }
