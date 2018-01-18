@@ -7,7 +7,7 @@ export default ({ config, db }) => {
 	let api = Router();
 
 	api.use('/upload', upload({ config, db }));
-  //api.use('/converter', converter({ config, db }));
+  api.use('/converter', converter({ config, db }));
 
 	// perhaps expose some API metadata at the root
 	api.get('/', (req, res) => {
