@@ -92,8 +92,9 @@ export async function checkFolders(path) {
   if(files.length) {
     if(files.length === 1 || files.length === 2) {
       if(files.indexOf('__MACOSX') !== -1) {
-        await fs.delete(`${path}/__MACOSX`);  
+        await fs.delete(`${path}/__MACOSX`);
       }
+      
       const newPath = `${path}/${files[0]}`;
       files = await fs.readdir(newPath);
 
@@ -102,6 +103,7 @@ export async function checkFolders(path) {
         newPath
       }
     }
+
     return {
       files,
       [newPath] : path
