@@ -2,4 +2,7 @@
 /logs
 /npm-debug.log
 /node_modules
+/compressed
+/decompressed
+/itunes
 .DS_Store
