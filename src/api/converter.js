@@ -29,7 +29,7 @@ export default ({ config, db }) => resource({
       await ConvertItunesCommander.init();
       
       return res.status(200).send({
-        message: `The tracks of this album has been filled with metadata`
+        message: `The tracks of this album has been filled`
       })
     } catch (err) {
       logger.error(err);
