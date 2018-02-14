@@ -36,12 +36,13 @@
     "express": "^4.13.3",
     "express-fileupload": "^0.3.0",
     "ffmetadata": "^1.4.0",
+    "file-zip": "^1.0.1",
     "last-fm": "^5.1.2",
     "log4js": "^2.4.1",
     "morgan": "^1.8.0",
     "resource-router-middleware": "^0.6.0",
-    "unzipper": "^0.8.11",
-    "uuid": "^3.1.0"
+    "uuid": "^3.1.0",
+    "zip-dir": "^1.0.2"
   },
   "devDependencies": {
     "babel-cli": "^6.9.0",
