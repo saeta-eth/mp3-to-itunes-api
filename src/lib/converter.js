@@ -28,7 +28,8 @@ class ConvertItunes {
     apiKey = this.throwIfMissing(),
     extensions = this.throwIfMissing(),
     mp3Files = this.throwIfMissing(),
-    path = this.throwIfMissing()
+    path = this.throwIfMissing(),
+    pathItunes = this.throwIfMissing()
   ) {
     this.isString(apiKey);
     this.isArray(mp3Files);
@@ -36,6 +37,7 @@ class ConvertItunes {
     this.mp3Files = mp3Files;
     this.extensions = extensions;
     this.path = path;
+    this.pathItunes = pathItunes;
     this.albumInfo = [];
     this.thumbnail = '';
     this.artist = '';
@@ -259,12 +261,18 @@ class ConvertItunes {
   }
 
   async createZipFile() {
-    await this.zipFolder();
+    try{
+      await this.zipFolder();
+    } catch(err) {
+      logger.error(err);
+      throw new Error(err);
+    }
   }
 
   zipFolder() {
     return new Promise((resolve, reject) => {
-      zipdir(this.path, { saveTo: `./itunes/${this.path}/${this.album[0]}.zip` }, function (err, buffer) {
+      !fs.existsSync(this.pathItunes) && fs.mkdirSync(this.pathItunes);
+      zipdir(this.path, { saveTo: `${this.pathItunes}/${this.album[0]}.zip` }, function (err, buffer) {
         if(err) {
           reject(err);
         } else {

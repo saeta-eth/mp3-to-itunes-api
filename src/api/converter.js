@@ -23,9 +23,10 @@ export default ({ config, db }) => resource({
   async update(req, res) {
     const id = req.params.converter;
     const pathDeCompressedFile = `${process.env.PWD}/decompressed/${id}`;
+    const pathItunesCompressedFile = `${process.env.PWD}/itunes/${id}`;
     try {
       const { files, newPath } = await checkFolders(pathDeCompressedFile);
-      const ConvertItunesCommander = new ConvertItunes(config.LAST_FM_API_KEY, config.EXTENSION_ACCEPTED, files, newPath);
+      const ConvertItunesCommander = new ConvertItunes(config.LAST_FM_API_KEY, config.EXTENSION_ACCEPTED, files, newPath, pathItunesCompressedFile);
       await ConvertItunesCommander.init();
       
       return res.status(200).send({
