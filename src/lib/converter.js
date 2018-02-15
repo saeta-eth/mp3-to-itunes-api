@@ -73,7 +73,7 @@ class ConvertItunes {
   */
   isArray(obj) {
     if (!(!!obj && obj.constructor === Array)) {
-      throw new Error('Wrong type parameter.');
+      throw 'Wrong type parameter.';
     }
   }
 
@@ -83,7 +83,7 @@ class ConvertItunes {
   */
   isString(value) {
     if (typeof value !== 'string' && !(value instanceof String)) {
-      throw new Error('Wrong type parameter.');
+      throw 'Wrong type parameter.';
     }
   }
 
@@ -91,7 +91,7 @@ class ConvertItunes {
     * Set default error if parameter is missing
   */
   throwIfMissing() {
-    throw new Error('Missing parameter.');
+    throw 'Missing parameter.';
   }
 
   /**
@@ -186,7 +186,7 @@ class ConvertItunes {
         });
       } catch(err) {
         logger.error(err);
-        throw new Error(err);
+        throw err;
       }
     }));
   }
@@ -253,7 +253,7 @@ class ConvertItunes {
             await this.setMetadata(filePath, metadata, options);  
           } catch(err) {
             logger.error(err);
-            throw new Error(err);
+            throw err;
           }
         }
       }
@@ -265,7 +265,7 @@ class ConvertItunes {
       await this.zipFolder();
     } catch(err) {
       logger.error(err);
-      throw new Error(err);
+      throw err;
     }
   }
 
