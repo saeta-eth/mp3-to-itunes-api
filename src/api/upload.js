@@ -108,6 +108,7 @@ export default ({ config, db }) => resource({
     const id = req.params.upload;
     try {
       await fs.unlink(`${process.env.PWD}/compressed/${id}.zip`);
+      await fs.rimraf(`${process.env.PWD}/itunes/${id}`);
       await fs.rimraf(`${process.env.PWD}/decompressed/${id}`);
       return res.status(200).json({
         message: `All about ${id} were removed`
