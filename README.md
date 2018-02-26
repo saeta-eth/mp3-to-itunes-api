@@ -1,29 +1,9 @@
-Express & ES6 REST API Boilerplate
-==================================
-
-This is a straightforward boilerplate for building REST APIs with ES6 and Express.
-
-- ES6 support via [babel](https://babeljs.io)
-- REST resources as middleware via [resource-router-middleware](https://github.com/developit/resource-router-middleware)
-- CORS support via [cors](https://github.com/troygoode/node-cors)
-- Body Parsing via [body-parser](https://github.com/expressjs/body-parser)
-
-> Tip: If you are using [Mongoose](https://github.com/Automattic/mongoose), you can automatically expose your Models as REST resources using [restful-mongoose](https://git.io/restful-mongoose).
-
-<a target='_blank' rel='nofollow' href='https://app.codesponsor.io/link/WbARjbDRQz5y3N6VBEMPU4LW/developit/express-es6-rest-api'>
-  <img alt='Sponsor' width='888' height='68' src='https://app.codesponsor.io/embed/WbARjbDRQz5y3N6VBEMPU4LW/developit/express-es6-rest-api.svg' />
-</a>
-
-Getting Started
----------------
+## Getting Started
 
 ```sh
 # clone it
-git clone git@github.com:developit/express-es6-rest-api.git
-cd express-es6-rest-api
-
-# Make it your own
-rm -rf .git && git init && npm init
+git clone https://github.com/slorenzo/api-mp3-to-itunes.git
+cd api-mp3-to-itunes
 
 # Install dependencies
 npm install
@@ -34,18 +14,19 @@ PORT=8080 npm run dev
 # Start production server:
 PORT=8080 npm start
 ```
-Docker Support
-------
+
+## Docker Support
+
 ```sh
-cd express-es6-rest-api
+cd api-mp3-to-itunes
 
 # Build your docker
-docker build -t es6/api-service .
+docker build -t es6/api-mp3-to-itunes .
 #            ^      ^           ^
 #          tag  tag name      Dockerfile location
 
 # run your docker
-docker run -p 8080:8080 es6/api-service
+docker run -p 8080:8080 es6/api-mp3-to-itunes
 #                 ^            ^
 #          bind the port    container tag
 #          to your host
@@ -53,7 +34,12 @@ docker run -p 8080:8080 es6/api-service
 
 ```
 
-License
--------
+## Made with ❤ by
 
-MIT
+- Sebastian Lorenzo (Javascript developer)
+- E-mail: [SebastianLorenzo@gmail.com](mailto:SebastianLorenzo@gmail.com)
+- StackOverflow: [sebastian-lorenzo](http://stackoverflow.com/users/1741027/sebastian-lorenzo?tab=profile)
+
+## License
+
+MIT license. Copyright © 2018.
