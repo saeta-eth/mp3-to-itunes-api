@@ -27,14 +27,14 @@ export default ({ config, db }) => resource({
 			return res.status(400).send('No files were uploaded.');
 		}
 		
-		const compressedFile = req.files.compressedFile;
-		const mimetype = req.files.compressedFile.mimetype;
+		const compressedFile = req.files.file;
+		const mimetype = compressedFile.mimetype;
 		
-		if((mimetype === 'application/zip' || path.extname(req.files.compressedFile.name) === '.zip') 
-			|| (mimetype === 'application/tar' || path.extname(req.files.compressedFile.name) === '.tar')) {
+		if((mimetype === 'application/zip' || path.extname(compressedFile.name) === '.zip') 
+			|| (mimetype === 'application/tar' || path.extname(compressedFile.name) === '.tar')) {
 
 			const newName = uuid.v1();
-			const pathCompressedFile = `${process.env.PWD}/compressed/${newName}${path.extname(req.files.compressedFile.name)}`;
+			const pathCompressedFile = `${process.env.PWD}/compressed/${newName}${path.extname(compressedFile.name)}`;
 			const pathDeCompressedFile = `${process.env.PWD}/decompressed/${newName}`;
 
 			compressedFile.mv(pathCompressedFile, function(err) {
@@ -42,7 +42,7 @@ export default ({ config, db }) => resource({
 		      return res.status(500).send(err);
 		    }
 		    
-		    decompressedFile(pathCompressedFile, pathDeCompressedFile, path.extname(req.files.compressedFile.name), async (err) => {
+		    decompressedFile(pathCompressedFile, pathDeCompressedFile, path.extname(compressedFile.name), async (err) => {
 		    	if (err) {
 			      return res.status(500).send(err);
 			    }
