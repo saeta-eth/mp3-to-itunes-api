@@ -5,10 +5,10 @@ import * as fs from 'async-file';
 import axios from 'axios';
 
 import {
-	decompressedFile,
-	checkAverageExtension,
-	removeFilesExceptExt,
-	getFilesFromFolder
+  decompressedFile,
+  checkAverageExtension,
+  removeFilesExceptExt,
+  getFilesFromFolder
 } from '../lib/util';
 
 import log4js from '../lib/logger';
@@ -18,34 +18,34 @@ const logger = log4js.getLogger(fileName);
 
 export default ({ config, db }) => resource({
 
-	/** Property name to store preloaded entity on `request`. */
-	id : 'upload',
+  /** Property name to store preloaded entity on `request`. */
+  id : 'upload',
 
-	/** POST / - Create a new entity */
-	create(req, res) {
-		if (!req.files) {
-			return res.status(400).send('No files were uploaded.');
-		}
-		
-		const compressedFile = req.files.file;
-		const mimetype = compressedFile.mimetype;
-		
-		if((mimetype === 'application/zip' || path.extname(compressedFile.name) === '.zip') 
-			|| (mimetype === 'application/tar' || path.extname(compressedFile.name) === '.tar')) {
+  /** POST / - Create a new entity */
+  create(req, res) {
+    if (!req.files) {
+      return res.status(400).send('No files were uploaded.');
+    }
+    
+    const compressedFile = req.files.file;
+    const mimetype = compressedFile.mimetype;
+    
+    if((mimetype === 'application/zip' || path.extname(compressedFile.name) === '.zip') 
+      || (mimetype === 'application/tar' || path.extname(compressedFile.name) === '.tar')) {
 
-			const newName = uuid.v1();
-			const pathCompressedFile = `${process.env.PWD}/compressed/${newName}${path.extname(compressedFile.name)}`;
-			const pathDeCompressedFile = `${process.env.PWD}/decompressed/${newName}`;
+      const newName = uuid.v1();
+      const pathCompressedFile = `${process.env.PWD}/compressed/${newName}${path.extname(compressedFile.name)}`;
+      const pathDeCompressedFile = `${process.env.PWD}/decompressed/${newName}`;
 
-			compressedFile.mv(pathCompressedFile, function(err) {
-		    if (err) {
-		      return res.status(500).send(err);
-		    }
-		    
-		    decompressedFile(pathCompressedFile, pathDeCompressedFile, path.extname(compressedFile.name), async (err) => {
-		    	if (err) {
-			      return res.status(500).send(err);
-			    }
+      compressedFile.mv(pathCompressedFile, function(err) {
+        if (err) {
+          return res.status(500).send(err);
+        }
+        
+        decompressedFile(pathCompressedFile, pathDeCompressedFile, path.extname(compressedFile.name), async (err) => {
+          if (err) {
+            return res.status(500).send(err);
+          }
           try{
             const url = `http://${config.URL_DEV}:${config.PORT_DEV}/api/upload/${newName}`;
             await axios.put(url);
@@ -56,15 +56,15 @@ export default ({ config, db }) => resource({
             logger.error(err);
             return res.status(500).send(err);
           }
-		    });
-		  });
-		} else {
-			return res.status(500).send('The file is not a zip or tar.');
-		}
-	},
+        });
+      });
+    } else {
+      return res.status(500).send('The file is not a zip or tar.');
+    }
+  },
 
-	async update(req, res) {
-		if (!req.params.upload) {
+  async update(req, res) {
+    if (!req.params.upload) {
       return res.status(400).send('No upload id found.');
     }
     
