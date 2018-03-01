@@ -7,10 +7,13 @@ import cors from 'cors';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import fileUpload from 'express-fileupload';
+import path from 'path';
+
 import initializeDb from './db';
 import middleware from './middleware';
 import api from './api';
 import config from './config.json';
+import { getFilesFromFolder } from './lib/util';
 
 let app = express();
 app.server = http.createServer(app);
@@ -28,6 +31,19 @@ app.use(bodyParser.json({
 }));
 
 app.use(fileUpload());
+
+app.get('/itunes/:id', async function (req, res) {
+  try {
+    const files = await getFilesFromFolder(`${process.cwd()}/itunes/${req.params.id}`);
+    const fileName = files[0].split('/').pop()
+    const extension = path.extname(fileName)
+    const fileNameWithoutExt = fileName.split('.')[0]
+    res.download(files[0], `${fileNameWithoutExt} (by mp3-to-video)${extension}`);  
+  } catch(err) {
+    return res.status(500).send(err);
+  }
+  
+});
 
 // connect to db
 initializeDb( db => {
