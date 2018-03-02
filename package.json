@@ -33,6 +33,7 @@
     "body-parser": "^1.13.3",
     "compression": "^1.5.2",
     "cors": "^2.7.1",
+    "dos-config": "^3.0.2",
     "express": "^4.13.3",
     "express-fileupload": "^0.3.0",
     "ffmetadata": "^1.4.0",
@@ -50,6 +51,7 @@
     "babel-polyfill": "^6.26.0",
     "babel-preset-es2015": "^6.9.0",
     "babel-preset-stage-0": "^6.5.0",
+    "copy-dir": "^0.3.0",
     "eslint": "^3.1.1",
     "nodemon": "^1.9.2"
   }
