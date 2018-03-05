@@ -1,0 +1,20 @@
+{
+  "name": "api-mp3-to-itunes",
+  "type": "docker",
+  "files": [
+    "src",
+    "config",
+    "Dockerfile",
+    "now.json",
+    "package.json",
+    "package-lock.json",
+    "README.MD",
+    "LICENCE"
+  ],
+  "alias": [
+    "api.mp3-to-itunes.com"
+  ],
+  "env": {
+    "NODE_ENV": "production"
+  }
+}
