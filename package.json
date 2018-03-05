@@ -1,13 +1,9 @@
 {
   "name": "api-mp3-to-itunes",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "The API of mp3-to-itunes.com",
-  "main": "dist",
   "scripts": {
-    "dev": "nodemon -w src --exec \"babel-node src --presets es2015,stage-0\"",
-    "build": "babel src -s -D -d dist --presets es2015,stage-0",
-    "start": "node dist",
-    "prestart": "npm run -s build",
+    "start": "nodemon -w src --exec \"babel-node src --presets es2015,stage-0\"",
     "test": "eslint src"
   },
   "eslintConfig": {
