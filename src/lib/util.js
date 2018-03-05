@@ -28,7 +28,7 @@ export async function checkAverageExtension(extensions, path) {
 
     return filesAccepted.length/files.length;
   }
-  return 0
+  return 0;
 }
 
 export async function removeFilesExceptExt(extensions, path) {

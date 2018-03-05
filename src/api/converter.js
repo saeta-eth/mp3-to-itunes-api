@@ -19,6 +19,18 @@ export default ({ config, db }) => resource({
   /** Property name to store preloaded entity on `request`. */
   id: 'converter',
 
+  async read(req, res) {
+    try {
+      const files = await getFilesFromFolder(`${process.cwd()}/itunes/${req.params.converter}`);
+      const fileName = files[0].split('/').pop();
+      const extension = path.extname(fileName);
+      const fileNameWithoutExt = fileName.split('.')[0];
+      res.download(files[0], `${fileNameWithoutExt} (by mp3-to-video)${extension}`);  
+    } catch(err) {
+      return res.status(500).send(err);
+    }
+  },
+
   /** PUT / - Create a new entity */
   async update(req, res) {
     const id = req.params.converter;
@@ -26,7 +38,7 @@ export default ({ config, db }) => resource({
     const pathItunesCompressedFile = `${process.env.PWD}/itunes/${id}`;
     try {
       const { files, newPath } = await checkFolders(pathDeCompressedFile);
-      const ConvertItunesCommander = new ConvertItunes(config.LAST_FM_API_KEY, config.EXTENSION_ACCEPTED, files, newPath, pathItunesCompressedFile);
+      const ConvertItunesCommander = new ConvertItunes(config.lastFmApiKey, config.extensionAccepted, files, newPath, pathItunesCompressedFile);
       await ConvertItunesCommander.init();
       
       return res.status(200).send({

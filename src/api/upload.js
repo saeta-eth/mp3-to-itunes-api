@@ -24,7 +24,7 @@ export default ({ config, db }) => resource({
   /** POST / - Create a new entity */
   create(req, res) {
     if (!req.files) {
-      return res.status(400).send('No files were uploaded.');
+      return res.status(500).send('No files were uploaded.');
     }
     
     const compressedFile = req.files.file;
@@ -36,25 +36,30 @@ export default ({ config, db }) => resource({
       const newName = uuid.v1();
       const pathCompressedFile = `${process.env.PWD}/compressed/${newName}${path.extname(compressedFile.name)}`;
       const pathDeCompressedFile = `${process.env.PWD}/decompressed/${newName}`;
-
-      compressedFile.mv(pathCompressedFile, function(err) {
+      compressedFile.mv(pathCompressedFile, async (err) => {
         if (err) {
-          return res.status(500).send(err);
+          logger.error(err);
+          return res.status(500)
         }
         
         decompressedFile(pathCompressedFile, pathDeCompressedFile, path.extname(compressedFile.name), async (err) => {
           if (err) {
-            return res.status(500).send(err);
+            logger.error(err);
+            return res.status(500)
           }
-          try{
-            const url = `http://${config.URL_DEV}:${config.PORT_DEV}/api/upload/${newName}`;
+          try {
+            // Now does't accept request to port 80. Ignore port in producion environment when build an URL.
+            const url = process.env.NODE_ENV === 'development' 
+              ? `${config.baseUrl}:${config.port}/api/upload/${newName}`
+              : `${config.baseUrl}/api/upload/${newName}`;
+
             await axios.put(url);
             return res.status(200).json({
               fileName: newName
             });
           } catch(err) {
             logger.error(err);
-            return res.status(500).send(err);
+            return res.status(500)
           }
         });
       });
@@ -76,11 +81,11 @@ export default ({ config, db }) => resource({
         message: `The ID: ${folderName} is not found.`
       });
     }
-    const percentageAcceptedExtensions = await checkAverageExtension(config.EXTENSION_ACCEPTED, pathDeCompressedFile)
-    if (percentageAcceptedExtensions > config.PERCENTAGE_ACCEPTED) {
+    const percentageAcceptedExtensions = await checkAverageExtension(config.extensionAccepted, pathDeCompressedFile);
+    if (percentageAcceptedExtensions > config.porcentageAccepted) {
       // @slorenzo: If is an album, I remove other files with different extension.
       try {
-        removeFilesExceptExt(config.EXTENSION_ACCEPTED, pathDeCompressedFile);
+        removeFilesExceptExt(config.extensionAccepted, pathDeCompressedFile);
         return res.status(200).json({
           message: 'The .zip was successfully loaded'
         });
@@ -89,7 +94,11 @@ export default ({ config, db }) => resource({
         return res.status(500).send(err);
       }
     } else {
-      const url = `http://${config.URL_DEV}:${config.PORT_DEV}/api/upload/${req.params.upload}`;
+      // Now does't accept request to port 80. Ignore port in producion environment when build an URL.
+      const url = process.env.NODE_ENV === 'development' 
+        ? `${config.baseUrl}:${config.port}/api/upload/${req.params.upload}`
+        : `${config.baseUrl}/api/upload/${req.params.upload}`;
+
       try{
         await axios.delete(url);
         return res.status(500).json({
