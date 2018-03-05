@@ -1,3 +1,7 @@
+## api.mp3-to-itunes.com
+
+> The API for [mp3-to-itunes.com](https://mp3-to-itunes.com) project.
+
 ## Getting Started
 
 ```sh
@@ -5,30 +9,15 @@
 git clone https://github.com/slorenzo/api-mp3-to-itunes.git
 cd api-mp3-to-itunes
 
-# Install dependencies
-npm install
-
-# Start development live-reload server
-PORT=8080 npm run dev
-
-# Start production server:
-PORT=8080 npm start
-```
-
-## Docker Support
-
-```sh
-cd api-mp3-to-itunes
-
-# Build your docker
+# Build your docker image
 docker build -t es6/api-mp3-to-itunes .
 #            ^      ^           ^
 #          tag  tag name      Dockerfile location
 
-# run your docker
-docker run -p 8080:8080 es6/api-mp3-to-itunes
-#                 ^            ^
-#          bind the port    container tag
+# Run your docker image
+docker run -p 8080:80 es6/api-mp3-to-itunes
+#                 ^              ^
+#          bind the port      container tag
 #          to your host
 #          machine port   
 
