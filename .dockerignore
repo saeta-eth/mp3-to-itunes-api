@@ -1,0 +1,9 @@
+/dist
+/logs
+/node_modules
+/compressed
+/decompressed
+/itunes
+
+npm-debug.log
+.DS_Store
