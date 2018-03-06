@@ -4,6 +4,7 @@
   "description": "The API of mp3-to-itunes.com",
   "scripts": {
     "start": "nodemon -w src --exec \"babel-node src --presets es2015,stage-0\"",
+    "dev": "NODE_ENV=development nodemon -w src --exec \"babel-node src --presets es2015,stage-0\"",
     "test": "eslint src"
   },
   "eslintConfig": {
