@@ -14,7 +14,10 @@ export async function checkAverageExtension(extensions, path) {
   let files = await fs.readdir(path);
   if(files.length) {
     if(files.length === 1 || (files.length === 2 && files.indexOf('__MACOSX') !== -1)) {
-      files = await getFilesFromFolder(`${path}/${files[0]}`);
+      const isFile = fsx.lstatSync(`${path}/${files[0]}`).isFile()
+      if(!isFile) {
+        files = await getFilesFromFolder(`${path}/${files[0]}`);    
+      }
     }
 
     let filesAccepted = [];

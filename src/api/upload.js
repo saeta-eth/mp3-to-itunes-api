@@ -39,13 +39,13 @@ export default ({ config, db }) => resource({
       compressedFile.mv(pathCompressedFile, async (err) => {
         if (err) {
           logger.error(err);
-          return res.status(500)
+          return res.status(500).send(err);
         }
         
         decompressedFile(pathCompressedFile, pathDeCompressedFile, path.extname(compressedFile.name), async (err) => {
           if (err) {
             logger.error(err);
-            return res.status(500)
+            return res.status(500).send(err);
           }
           try {
             // Now does't accept request to port 80. Ignore port in producion environment when build an URL.
@@ -59,7 +59,7 @@ export default ({ config, db }) => resource({
             });
           } catch(err) {
             logger.error(err);
-            return res.status(500)
+            return res.status(500).send(err.response.data);
           }
         });
       });
@@ -74,18 +74,18 @@ export default ({ config, db }) => resource({
     }
     
     const folderName = req.params.upload;
-    const pathDeCompressedFile = `${process.env.PWD}/decompressed/${folderName}`;
-    if (!(await fs.exists(pathDeCompressedFile))) {
+    const pathDecompressedFile = `${process.env.PWD}/decompressed/${folderName}`;
+    if (!(await fs.exists(pathDecompressedFile))) {
       return res.status(500).json({
-        status: 404,
         message: `The ID: ${folderName} is not found.`
       });
     }
-    const percentageAcceptedExtensions = await checkAverageExtension(config.extensionAccepted, pathDeCompressedFile);
+
+    const percentageAcceptedExtensions = await checkAverageExtension(config.extensionAccepted, pathDecompressedFile);
     if (percentageAcceptedExtensions > config.porcentageAccepted) {
       // @slorenzo: If is an album, I remove other files with different extension.
       try {
-        removeFilesExceptExt(config.extensionAccepted, pathDeCompressedFile);
+        removeFilesExceptExt(config.extensionAccepted, pathDecompressedFile);
         return res.status(200).json({
           message: 'The .zip was successfully loaded'
         });
@@ -102,7 +102,6 @@ export default ({ config, db }) => resource({
       try{
         await axios.delete(url);
         return res.status(500).json({
-          status: 500,
           message: 'The .zip not contains .mp3 files'
         });
       } catch(err) {
