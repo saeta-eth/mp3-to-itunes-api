@@ -232,7 +232,7 @@ class ConvertItunes {
       for (let file of this.mp3Files) {
 
         const title  = this.formatStringToCompare(trackInfo.title);
-        const trackName = this.formatStringToCompare(this.fillTrackName(file));
+        const trackName = this.formatStringToCompare(this.getTrackWithFormat(file));
 
         if(trackName.includes(title)) {
           const filePath = `${this.path}/${file}`;
@@ -282,33 +282,8 @@ class ConvertItunes {
     });
   }
 
-  fillTrackName(fileName) {
-    const map = this.fillMapWith();
-    const tracksName = this.strReplaceMap(fileName, map);
-    
-    return tracksName;
-  }
-
-  strReplaceMap(str, map) {
-    const field = Object.keys(map);
-    for (let search of field) {
-      str = str.replace(search, map[search]);
-    }
-
-    return str;
-  }
-
-  fillMapWith() {
-    let map = {};
-    for (let extension of this.extensions) {
-      map[`.${extension}`] = '';
-    }
-
-    return map;
-  }
-
   formatStringToCompare(str) {
-    return str.toLowerCase().replace(/ /g,'').replace(/'/g, '').replace(/-/g, '');
+    return str.toLowerCase().replace(/ /g,'').replace(/'/g, '').replace(/-/g, '')
   }
 
   /**
