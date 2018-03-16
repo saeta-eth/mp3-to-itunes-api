@@ -172,14 +172,15 @@ class ConvertItunes {
       try {
         const metadata = await this.getMetadata(path);
         const track = this.getTrackWithFormat(mp3);
+
         const info = await this.trackInfo(metadata.title || track, metadata.artist);
 
         this.albumInfo.push({
-          title: metadata.title || track,
-          artist: info.artistName,
+          title: metadata.title || track || null,
+          artist: info.artistName || null,
           album: info.albumName || null,
-          thumbnail: info.images && info.images[info.images.length - 1],
-          position: info.position
+          thumbnail: (info.images && info.images[info.images.length - 1]) || null,
+          position: info.position || null
         });
       } catch(err) {
         logger.error(err);
@@ -193,9 +194,17 @@ class ConvertItunes {
       return a.position - b.position
     });
 
-    const thumbnail = this.albumInfo.map(track => track.thumbnail)
-    const artist = this.albumInfo.map(track => track.artist);
-    const album = this.albumInfo.map(track => track.album);
+    const thumbnail = this.albumInfo
+      .filter(track => Boolean(track.thumbnail))
+      .map(track => track.thumbnail)
+
+    const artist = this.albumInfo
+      .filter(track => Boolean(track.artist))
+      .map(track => track.artist);
+
+    const album = this.albumInfo
+      .filter(track => Boolean(track.album))
+      .map(track => track.album);
 
     this.thumbnail = this.findMostCommondValue(thumbnail);
     this.artist = this.findMostCommondValue(artist);
@@ -291,7 +300,13 @@ class ConvertItunes {
   }
 
   formatStringToCompare(str) {
-    return str.toLowerCase().replace(/ /g,'').replace(/'/g, '').replace(/-/g, '').replace(/[^\w\s]/gi, '')
+    return str
+      .toLowerCase()
+      .replace(/ /g,'')
+      .replace(/'/g, '')
+      .replace(/-/g, '')
+      .replace(/ *\([^)]*\) */g, "")
+      .replace(/[^\w\s]/gi, '')
   }
 
   /**
@@ -300,6 +315,7 @@ class ConvertItunes {
   */
   async init(callback) {
     await this.fillAlbumInfo();
+    console.log('this.albumInfo', this.albumInfo)
     await this.fillSpecificInfoFromAlbumInfo();
     await this.fillMetada();
     await this.createZipFile();
