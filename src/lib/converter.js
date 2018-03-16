@@ -220,11 +220,6 @@ class ConvertItunes {
         const title  = this.formatStringToCompare(trackInfo.title);
         const trackName = this.formatStringToCompare(file);
 
-        console.log('title', title)
-        console.log('trackName', trackName)
-        console.log('compareStrings', this.compareStrings(trackName, title))
-        console.log('===================')
-
         if(trackName.includes(title) || this.compareStrings(trackName, title) > config.stringComparePercentageAccepted) {
           const filePath = `${this.path}/${file}`;
           
