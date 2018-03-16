@@ -290,6 +290,7 @@ class ConvertItunes {
       .replace(/\d+/g, '')
       .replace(/'/g, '')
       .replace(/-/g, '')
+      .replace(/\[.*?\]\s?/g, '')
       .replace(/ *\([^)]*\) */g, "")
       .replace(/[^\w\s]/gi, '')
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
