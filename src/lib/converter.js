@@ -17,6 +17,7 @@ import fs from 'fs';
 import path from 'path';
 import zip from 'file-zip';
 import zipdir from 'zip-dir';
+import config from 'dos-config';
 import log4js from '../lib/logger';
 import { getFilesFromFolder } from './util';
 
@@ -162,13 +163,9 @@ class ConvertItunes {
       });
     });
   }
-
   /**
     * Search track in LastFM API and filling this data on metadata of mp3.
-    * @param {array} paths of mp3 files (eg. /path/to/song.mp3)
-    * @param {fillMetadataToMp3~requestCallback} callbackEnd
   */
-
   async fillAlbumInfo() {
     await Promise.all(this.mp3Files.map(async (mp3, index) => {
       const path = `${this.path}/${mp3}`;
@@ -234,7 +231,7 @@ class ConvertItunes {
         const title  = this.formatStringToCompare(trackInfo.title);
         const trackName = this.formatStringToCompare(this.getTrackWithFormat(file));
 
-        if(trackName.includes(title)) {
+        if(trackName.includes(title) || this.compareStrings(trackName, title) > config.stringComparePercentageAccepted) {
           const filePath = `${this.path}/${file}`;
           
           const metadata = {
@@ -260,6 +257,17 @@ class ConvertItunes {
     }
   }
 
+  compareStrings(strA, strB) {
+    for(var result = 0, i = strA.length; i--;){
+        if(typeof strB[i] == 'undefined' || strA[i] == strB[i]);
+        else if(strA[i].toLowerCase() == strB[i].toLowerCase())
+            result++;
+        else
+            result += 4;
+    }
+    return 1 - (result + 4*Math.abs(strA.length - strB.length))/(2*(strA.length+strB.length));
+  }
+
   async createZipFile() {
     try{
       await this.zipFolder();
@@ -283,7 +291,7 @@ class ConvertItunes {
   }
 
   formatStringToCompare(str) {
-    return str.toLowerCase().replace(/ /g,'').replace(/'/g, '').replace(/-/g, '')
+    return str.toLowerCase().replace(/ /g,'').replace(/'/g, '').replace(/-/g, '').replace(/[^\w\s]/gi, '')
   }
 
   /**
