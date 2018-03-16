@@ -129,26 +129,6 @@ class ConvertItunes {
     });
   }
 
-  /**
-    * Format file path as track name.
-    * @param {string} file path (eg. /path/to/song.mp3)
-  */
-
-  getTrackWithFormat(file) {
-    const lastDot = file.lastIndexOf('.');
-    // @slorenzo: remove string between paretheses.
-    let track = file.split('-').pop().substring(0, lastDot).replace(/\([^()]*\)/g, '').split('.')[0];
-    const firstDigit = track.match(/(\d+)/);
-    if (firstDigit && firstDigit !== -1) {
-      // @slorenzo: remove numbers.
-      const regex = new RegExp(firstDigit[0], 'g');
-      track = track.replace(regex, '');
-    }
-    // @slorenzo: remove accents.
-    return track.normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim(); 
-  }
-
-
   trackInfo(title, artist) {
     return new Promise((resolve, reject) => {
       this.lastFM.trackInfo({
@@ -171,7 +151,7 @@ class ConvertItunes {
       const path = `${this.path}/${mp3}`;
       try {
         const metadata = await this.getMetadata(path);
-        const track = this.getTrackWithFormat(mp3);
+        const track = this.formatStringToCompare(mp3);
 
         const info = await this.trackInfo(metadata.title || track, metadata.artist);
 
@@ -180,7 +160,7 @@ class ConvertItunes {
           artist: info.artistName || null,
           album: info.albumName || null,
           thumbnail: (info.images && info.images[info.images.length - 1]) || null,
-          position: info.position || null
+          position: info.position || metadata.track || null
         });
       } catch(err) {
         logger.error(err);
@@ -238,7 +218,12 @@ class ConvertItunes {
       for (let file of this.mp3Files) {
 
         const title  = this.formatStringToCompare(trackInfo.title);
-        const trackName = this.formatStringToCompare(this.getTrackWithFormat(file));
+        const trackName = this.formatStringToCompare(file);
+
+        console.log('title', title)
+        console.log('trackName', trackName)
+        console.log('compareStrings', this.compareStrings(trackName, title))
+        console.log('===================')
 
         if(trackName.includes(title) || this.compareStrings(trackName, title) > config.stringComparePercentageAccepted) {
           const filePath = `${this.path}/${file}`;
@@ -299,14 +284,21 @@ class ConvertItunes {
     });
   }
 
+  /**
+    * Format file path as track name.
+    * @param {string} file path (eg. /path/to/song.mp3)
+  */
+
   formatStringToCompare(str) {
     return str
       .toLowerCase()
-      .replace(/ /g,'')
+      .replace(/\d+/g, '')
       .replace(/'/g, '')
       .replace(/-/g, '')
       .replace(/ *\([^)]*\) */g, "")
       .replace(/[^\w\s]/gi, '')
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .replace(/ /g,'')
   }
 
   /**
@@ -315,7 +307,6 @@ class ConvertItunes {
   */
   async init(callback) {
     await this.fillAlbumInfo();
-    console.log('this.albumInfo', this.albumInfo)
     await this.fillSpecificInfoFromAlbumInfo();
     await this.fillMetada();
     await this.createZipFile();
