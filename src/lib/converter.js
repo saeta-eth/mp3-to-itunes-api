@@ -152,21 +152,25 @@ class ConvertItunes {
       try {
         const metadata = await this.getMetadata(path);
         const track = this.formatStringToCompare(mp3);
-
-        const info = await this.trackInfo(metadata.title || track, metadata.artist);
+        const title = this.checkSpecialCharacter(metadata.title) ? track : metadata.title || null;
+        const info = await this.trackInfo(title, metadata.artist);
 
         this.albumInfo.push({
-          title: metadata.title || track || null,
+          title: title,
           artist: info.artistName || null,
           album: info.albumName || null,
-          thumbnail: (info.images && info.images[info.images.length - 1]) || null,
-          position: info.position || metadata.track || null
+          thumbnail: (info.images && info.images.length && info.images[info.images.length - 1]) || null,
+          position: parseInt(info.position) || parseInt(metadata.track) || null
         });
       } catch(err) {
         logger.error(err);
         throw err;
       }
     }));
+  }
+
+  checkSpecialCharacter(str) {
+    return /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(encodeURI(str));
   }
 
   async fillSpecificInfoFromAlbumInfo() {
@@ -231,7 +235,7 @@ class ConvertItunes {
             comment: 'Apple Lossless created by mp3-to-itunes.com',
           };
 
-          let options = {
+          const options = {
             attachments: [...this.thumbnail]
           };
 
@@ -287,6 +291,7 @@ class ConvertItunes {
   formatStringToCompare(str) {
     return str
       .toLowerCase()
+      .replace(/.mp3/g, '')
       .replace(/\d+/g, '')
       .replace(/'/g, '')
       .replace(/-/g, '')
