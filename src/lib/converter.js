@@ -1,26 +1,11 @@
-/* eslint class-methods-use-this:
-[ "error",
-  {"exceptMethods": [
-    "isString",
-    "isArray",
-    "throwIfMissing",
-    "getMetadata",
-    "setMetadata",
-    "getTrackWithFormat",
-    "fillMetadataToMp3"
-  ]}
-] */
-
 import LastFM from 'last-fm';
 import ffmetadata from 'ffmetadata';
 import fs from 'fs';
 import path from 'path';
-import zip from 'file-zip';
 import zipdir from 'zip-dir';
 import config from 'dos-config';
 import iconv from 'iconv-lite';
 import log4js from '../lib/logger';
-import { getFilesFromFolder } from './util';
 
 const fileName = path.basename(__filename, path.extname(__filename));
 const logger = log4js.getLogger(fileName);
@@ -54,8 +39,8 @@ class ConvertItunes {
   }
 
   /**
-    * It is a setter for mp3Files path
-    * @param {string} mp3Files path
+    * It is a setter for mp3Files variable
+    * @param {String} mp3Files
   */
   set changeMp3Files(mp3Files) {
     this.mp3Files = mp3Files;
@@ -63,7 +48,7 @@ class ConvertItunes {
 
   /**
     * It is a setter for apiKey
-    * @param {string} api key of last.fm api.
+    * @param {String} api key of last.fm api
   */
   set changeApiKey(apiKey) {
     this.apiKey = apiKey;
@@ -71,7 +56,7 @@ class ConvertItunes {
 
   /**
     * Check if params is an array
-    * @param {any} value be a arrauy
+    * @param {Any} value be a array
   */
   isArray(obj) {
     if (!(!!obj && obj.constructor === Array)) {
@@ -81,7 +66,7 @@ class ConvertItunes {
 
   /**
     * Check if params is a string
-    * @param {any} value be a string
+    * @param {Any} value be a string
   */
   isString(value) {
     if (typeof value !== 'string' && !(value instanceof String)) {
@@ -98,12 +83,13 @@ class ConvertItunes {
 
   /**
     * Get mp3 metadata.
-    * @param {string} file path (eg. /path/to/song.mp3)
+    * @param {String} filePath (eg. /path/to/song.mp3)
+    * @return Promise
   */
 
-  getMetadata(file) {
+  getMetadata(filePath) {
     return new Promise((resolve, reject) => {
-      ffmetadata.read(file, (err, data) => {
+      ffmetadata.read(filePath, (err, data) => {
         if (err) {
           reject(err);
         } else {
@@ -115,12 +101,15 @@ class ConvertItunes {
 
   /**
     * Write metadata to an mp3 file.
-    * @param {string} file path (eg. /path/to/song.mp3)
+    * @param {String} filePath (eg. /path/to/song.mp3)
+    * @param {Object} metadata
+    * @param {Object} options
+    * @return Promise
   */
 
-  setMetadata(file, metadata, options) {
+  setMetadata(filePath, metadata, options) {
     return new Promise((resolve, reject) => {
-      ffmetadata.write(file, metadata, options, (err, data) => {
+      ffmetadata.write(filePath, metadata, options, (err, data) => {
         if (err) {
           reject(err);
         } else {
@@ -129,6 +118,13 @@ class ConvertItunes {
       });
     });
   }
+
+  /**
+    * Search track information on LastFM.
+    * @param {String} title
+    * @param {String} artist
+    * @return {Promise}
+  */
 
   trackInfo(title, artist) {
     return new Promise((resolve, reject) => {
@@ -144,11 +140,13 @@ class ConvertItunes {
       });
     });
   }
+
   /**
-    * Search track in LastFM API and filling this data on metadata of mp3.
+    * Fill this.albumInfo with lastFM data.
   */
+
   async fillAlbumInfo() {
-    await Promise.all(this.mp3Files.map(async (mp3, index) => {
+    return Promise.all(this.mp3Files.map(async (mp3, index) => {
       const path = `${this.path}/${mp3}`;
       try {
         const metadata = await this.getMetadata(path);
@@ -173,13 +171,20 @@ class ConvertItunes {
 
   /**
     * Check if there is an accent in a string.
-    * @param {string} string
+    * @param {String} str
+    * @return Boolean
     * 
   */
 
   checkAccent(str) {
     return /[\u0300-\u036f]/g.test(str.normalize('NFD'));
   }
+
+  /**
+    * Fill this.thumbnail with most commond value
+    * Fill this.artist with most commond value
+    * Fill this.album with most commond value
+  **/
 
   async fillSpecificInfoFromAlbumInfo() {
     this.albumInfo = this.albumInfo.sort((a, b) => {
@@ -203,6 +208,12 @@ class ConvertItunes {
     this.album = this.findMostCommondValue(album);
   }
 
+  /**
+    * Get most commond value using fields of array of objects.
+    * @params {Array} arr
+    * @return {Array} 
+  **/
+
   findMostCommondValue(arr) {
     const tally = (acc, x) => { 
       if (! acc[x]) { 
@@ -224,6 +235,9 @@ class ConvertItunes {
     return results;
   }
 
+  /**
+    * Fill itunes metadata.
+  **/
 
   async fillMetada() {
     for(let trackInfo of this.albumInfo) {
@@ -256,6 +270,13 @@ class ConvertItunes {
       }
     }
   }
+
+  /**
+    * Get the string comparation based on Levenshtein distance.
+    * @params {String} s1
+    * @params {String} s2
+    * @return {Number} 
+  **/
 
   compareStrings(s1, s2) {
     let longer = s1.toLowerCase();
@@ -295,6 +316,11 @@ class ConvertItunes {
     return costs[s2.length];
   }
 
+  /**
+    * Create a zip file from folder
+    * @return {Promise}
+  **/
+
   async createZipFile() {
     return new Promise((resolve, reject) => {
       !fs.existsSync(this.pathItunes) && fs.mkdirSync(this.pathItunes);
@@ -310,8 +336,9 @@ class ConvertItunes {
 
   /**
     * Format file path as track name.
-    * @param {string} file path (eg. /path/to/song.mp3)
-  */
+    * @param {String} file path (eg. /path/to/song.mp3)
+    * @return {String}
+  **/
 
   formatStringToCompare(str) {
     return str
@@ -329,10 +356,9 @@ class ConvertItunes {
   }
 
   /**
-    * It is a module initialize
-    * @param {init~requestCallback} callback
+    * It is a module initialize.
   */
-  async init(callback) {
+  async init() {
     await this.fillAlbumInfo();
     await this.fillSpecificInfoFromAlbumInfo();
     await this.fillMetada();

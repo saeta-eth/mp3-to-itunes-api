@@ -7,13 +7,12 @@ import cors from 'cors';
 import morgan from 'morgan';
 import bodyParser from 'body-parser';
 import fileUpload from 'express-fileupload';
-import path from 'path';
 import config from 'dos-config';
 
 import initializeDb from './db';
 import middleware from './middleware';
 import api from './api';
-import { removeFilesMidnight } from './lib/midnight';
+import { removeFilesMidnight } from './lib/atMidnight';
 
 let app = express();
 app.server = http.createServer(app);

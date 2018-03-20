@@ -19,7 +19,6 @@ export function removeFilesMidnight() {
       await fs.unlink(`${compressedFolder}/${fileName}`);
       await fs.rimraf(`${itunesFolder}/${id}`);
       await fs.rimraf(`${decompressedFolder}/${id}`);
-    
     }
   });
 }
