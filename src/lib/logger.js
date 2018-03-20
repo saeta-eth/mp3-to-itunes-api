@@ -8,8 +8,7 @@ class Logger {
       },
       categories: {
         default: { appenders: [ 'multi' ], level: 'debug' }
-      },
-      pm2: true
+      }
     });
   }
   

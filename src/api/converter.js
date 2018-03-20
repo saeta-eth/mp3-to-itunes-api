@@ -34,8 +34,8 @@ export default ({ config, db }) => resource({
   /** PUT / - Create a new entity */
   async update(req, res) {
     const id = req.params.converter;
-    const pathDeCompressedFile = `${process.env.PWD}/decompressed/${id}`;
-    const pathItunesCompressedFile = `${process.env.PWD}/itunes/${id}`;
+    const pathDeCompressedFile = `${process.cwd()}/decompressed/${id}`;
+    const pathItunesCompressedFile = `${process.cwd()}/itunes/${id}`;
     try {
       const { files, newPath } = await checkFolders(pathDeCompressedFile);
       const ConvertItunesCommander = new ConvertItunes(config.lastFmApiKey, config.extensionAccepted, files, newPath, pathItunesCompressedFile);
@@ -46,7 +46,7 @@ export default ({ config, db }) => resource({
       })
     } catch (err) {
       logger.error(err);
-      return res.status(500).send(err);
+      return res.status(500).send(err.message);
     }
   }
 });

@@ -17,11 +17,9 @@ const logger = log4js.getLogger(fileName);
 
 
 export default ({ config, db }) => resource({
-
-  /** Property name to store preloaded entity on `request`. */
+  
   id : 'upload',
 
-  /** POST / - Create a new entity */
   create(req, res) {
     if (!req.files) {
       return res.status(500).send('No files were uploaded.');
@@ -30,12 +28,11 @@ export default ({ config, db }) => resource({
     const compressedFile = req.files.file;
     const mimetype = compressedFile.mimetype;
     
-    if((mimetype === 'application/zip' || path.extname(compressedFile.name) === '.zip') 
-      || (mimetype === 'application/tar' || path.extname(compressedFile.name) === '.tar')) {
+    if(mimetype === 'application/zip' || path.extname(compressedFile.name) === '.zip') {
 
       const newName = uuid.v1();
-      const pathCompressedFile = `${process.env.PWD}/compressed/${newName}${path.extname(compressedFile.name)}`;
-      const pathDeCompressedFile = `${process.env.PWD}/decompressed/${newName}`;
+      const pathCompressedFile = `${process.cwd()}/compressed/${newName}${path.extname(compressedFile.name)}`;
+      const pathDeCompressedFile = `${process.cwd()}/decompressed/${newName}`;
       compressedFile.mv(pathCompressedFile, async (err) => {
         if (err) {
           logger.error(err);
@@ -74,7 +71,7 @@ export default ({ config, db }) => resource({
     }
     
     const folderName = req.params.upload;
-    const pathDecompressedFile = `${process.env.PWD}/decompressed/${folderName}`;
+    const pathDecompressedFile = `${process.cwd()}/decompressed/${folderName}`;
     if (!(await fs.exists(pathDecompressedFile))) {
       return res.status(500).json({
         message: `The ID: ${folderName} is not found.`
@@ -115,15 +112,15 @@ export default ({ config, db }) => resource({
   async delete(req, res) {
     const id = req.params.upload;
     try {
-      await fs.unlink(`${process.env.PWD}/compressed/${id}.zip`);
-      await fs.rimraf(`${process.env.PWD}/itunes/${id}`);
-      await fs.rimraf(`${process.env.PWD}/decompressed/${id}`);
+      await fs.unlink(`${process.cwd()}/compressed/${id}.zip`);
+      await fs.rimraf(`${process.cwd()}/itunes/${id}`);
+      await fs.rimraf(`${process.cwd()}/decompressed/${id}`);
       return res.status(200).json({
         message: `All about ${id} were removed`
       });
     } catch(err) {
       logger.error(err);
-      return res.status(500).json(err);
+      return res.status(500).send(err.message);
     }
   }
 });
