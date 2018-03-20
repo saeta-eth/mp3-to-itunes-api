@@ -32,7 +32,7 @@ class ConvertItunes {
   }
 
   /**
-    * It is a getter, should show all params
+    * It is a getter, should show all param
   */
   get getAttributes() {
     return `ApiKey: ${this.apiKey} | mp3Files: ${this.mp3Files}!`;
@@ -55,7 +55,7 @@ class ConvertItunes {
   }
 
   /**
-    * Check if params is an array
+    * Check if param is an array
     * @param {Any} value be a array
   */
   isArray(obj) {
@@ -65,7 +65,7 @@ class ConvertItunes {
   }
 
   /**
-    * Check if params is a string
+    * Check if param is a string
     * @param {Any} value be a string
   */
   isString(value) {
@@ -84,7 +84,7 @@ class ConvertItunes {
   /**
     * Get mp3 metadata.
     * @param {String} filePath (eg. /path/to/song.mp3)
-    * @return Promise
+    * @return {Promise}
   */
 
   getMetadata(filePath) {
@@ -104,7 +104,7 @@ class ConvertItunes {
     * @param {String} filePath (eg. /path/to/song.mp3)
     * @param {Object} metadata
     * @param {Object} options
-    * @return Promise
+    * @return {Promise}
   */
 
   setMetadata(filePath, metadata, options) {
@@ -172,7 +172,7 @@ class ConvertItunes {
   /**
     * Check if there is an accent in a string.
     * @param {String} str
-    * @return Boolean
+    * @return {Boolean}
     * 
   */
 
@@ -210,7 +210,7 @@ class ConvertItunes {
 
   /**
     * Get most commond value using fields of array of objects.
-    * @params {Array} arr
+    * @param {Array} arr
     * @return {Array} 
   **/
 
@@ -273,8 +273,8 @@ class ConvertItunes {
 
   /**
     * Get the string comparation based on Levenshtein distance.
-    * @params {String} s1
-    * @params {String} s2
+    * @param {String} s1
+    * @param {String} s2
     * @return {Number} 
   **/
 
