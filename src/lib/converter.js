@@ -18,6 +18,7 @@ import path from 'path';
 import zip from 'file-zip';
 import zipdir from 'zip-dir';
 import config from 'dos-config';
+import iconv from 'iconv-lite';
 import log4js from '../lib/logger';
 import { getFilesFromFolder } from './util';
 
@@ -152,11 +153,12 @@ class ConvertItunes {
       try {
         const metadata = await this.getMetadata(path);
         const track = this.formatStringToCompare(mp3);
-        const title = this.checkSpecialCharacter(metadata.title) ? track : metadata.title || null;
+        const titleDecoded = iconv.decode(metadata.title, 'iso-8859-1')
+        const title = this.checkAccent(titleDecoded) ? track : metadata.title || null;
         const info = await this.trackInfo(title, metadata.artist);
 
         this.albumInfo.push({
-          title: title,
+          title: info.name,
           artist: info.artistName || null,
           album: info.albumName || null,
           thumbnail: (info.images && info.images.length && info.images[info.images.length - 1]) || null,
@@ -169,8 +171,14 @@ class ConvertItunes {
     }));
   }
 
-  checkSpecialCharacter(str) {
-    return /[ !@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(encodeURI(str));
+  /**
+    * Check if there is an accent in a string.
+    * @param {string} string
+    * 
+  */
+
+  checkAccent(str) {
+    return /[\u0300-\u036f]/g.test(str.normalize('NFD'));
   }
 
   async fillSpecificInfoFromAlbumInfo() {
@@ -220,7 +228,6 @@ class ConvertItunes {
   async fillMetada() {
     for(let trackInfo of this.albumInfo) {
       for (let file of this.mp3Files) {
-
         const title  = this.formatStringToCompare(trackInfo.title);
         const trackName = this.formatStringToCompare(file);
 
@@ -250,27 +257,45 @@ class ConvertItunes {
     }
   }
 
-  compareStrings(strA, strB) {
-    for(var result = 0, i = strA.length; i--;){
-        if(typeof strB[i] == 'undefined' || strA[i] == strB[i]);
-        else if(strA[i].toLowerCase() == strB[i].toLowerCase())
-            result++;
-        else
-            result += 4;
+  compareStrings(s1, s2) {
+    let longer = s1.toLowerCase();
+    let shorter = s2.toLowerCase();
+    if (s1.length < s2.length) {
+      longer = s2;
+      shorter = s1;
     }
-    return 1 - (result + 4*Math.abs(strA.length - strB.length))/(2*(strA.length+strB.length));
+    const longerLength = longer.length;
+    if (longerLength == 0) {
+      return 1.0;
+    }
+    return (longerLength - this.editDistance(longer, shorter)) / parseFloat(longerLength);
+  }
+
+  editDistance(s1, s2) {
+    let costs = new Array();
+    for (let i = 0; i <= s1.length; i++) {
+      let lastValue = i;
+      for (let j = 0; j <= s2.length; j++) {
+        if (i == 0)
+          costs[j] = j;
+        else {
+          if (j > 0) {
+            let newValue = costs[j - 1];
+            if (s1.charAt(i - 1) != s2.charAt(j - 1)) {
+              newValue = Math.min(Math.min(newValue, lastValue), costs[j]) + 1;
+            }
+            costs[j - 1] = lastValue;
+            lastValue = newValue;
+          }
+        }
+      }
+      if (i > 0)
+        costs[s2.length] = lastValue;
+    }
+    return costs[s2.length];
   }
 
   async createZipFile() {
-    try{
-      await this.zipFolder();
-    } catch(err) {
-      logger.error(err);
-      throw err;
-    }
-  }
-
-  zipFolder() {
     return new Promise((resolve, reject) => {
       !fs.existsSync(this.pathItunes) && fs.mkdirSync(this.pathItunes);
       zipdir(this.path, { saveTo: `${this.pathItunes}/${this.album[0]}.zip` }, function (err, buffer) {
@@ -299,7 +324,8 @@ class ConvertItunes {
       .replace(/ *\([^)]*\) */g, "")
       .replace(/[^\w\s]/gi, '')
       .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .replace(/ /g,'')
+      .trim()
+      
   }
 
   /**
