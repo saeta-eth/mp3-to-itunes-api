@@ -12,7 +12,7 @@ import config from 'dos-config';
 import initializeDb from './db';
 import middleware from './middleware';
 import api from './api';
-import { removeFilesMidnight } from './lib/atMidnight';
+import { removeFilesAtMidnight } from './lib/atMidnight';
 
 let app = express();
 app.server = http.createServer(app);
@@ -48,6 +48,6 @@ initializeDb( db => {
   });
 });
 
-removeFilesMidnight();
+removeFilesAtMidnight();
 
 export default app;
