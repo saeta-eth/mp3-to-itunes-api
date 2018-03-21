@@ -1,6 +1,8 @@
 import zip from 'file-zip';
 import * as fs from 'async-file';
 import * as fsx from 'fs';
+import junk from 'junk';
+import path from 'path';
 
 export function decompressedFile(pathCompressedFile, pathDeCompressedFile, extension, cb) {
   if (extension === '.zip') {
@@ -10,37 +12,40 @@ export function decompressedFile(pathCompressedFile, pathDeCompressedFile, exten
   }
 }
 
-export async function checkAverageExtension(extensions, path) {
-  let files = await fs.readdir(path);
-  if(files.length) {
-    if(files.length === 1 || (files.length === 2 && files.indexOf('__MACOSX') !== -1)) {
-      const isFile = fsx.lstatSync(`${path}/${files[0]}`).isFile()
-      if(!isFile) {
-        files = await getFilesFromFolder(`${path}/${files[0]}`);    
+export async function checkAverageExtension(extensions, folder) {
+  let files = await fs.readdir(folder);
+  let filesFiltered = files.filter(junk.not);
+  if(filesFiltered.length) {
+    if (filesFiltered.length === 1) {
+      const isDirectory = fsx.lstatSync(`${folder}/${filesFiltered[0]}`).isDirectory();
+      if(isDirectory) {
+        filesFiltered = await getFilesFromFolder(`${folder}/${filesFiltered[0]}`);    
       }
-    }
 
-    let filesAccepted = [];
-    for (let extension of extensions) {
-      for (let file of files) {
-        if(file.includes(extension)) {
-          filesAccepted.push(file);
-        } 
+      let filesAccepted = [];
+      for (let extension of extensions) {
+        for (let file of filesFiltered) {
+          if(file.includes(extension)) {
+            filesAccepted.push(file);
+          } 
+        }
       }
-    }
 
-    return filesAccepted.length/files.length;
+      return filesAccepted.length/filesFiltered.length;
+    } else {
+      throw new Error('The folder or file has deeper directories');
+    }
   }
   return 0;
 }
 
-export async function removeFilesExceptExt(extensions, path) {
+export async function removeFilesExceptExt(extensions, folder) {
   try{
-    const { files, newPath } = await checkFolders(path);
+    const { files, pathFolder } = await checkFolder(folder);
     for (let file of files) {
-      const fileExtension = file.split('.').pop();
+      const fileExtension = path.parse(file).ext;
       if(!extensions.includes(fileExtension)){
-        await fs.delete(`${newPath}/${file}`);
+        await fs.delete(`${pathFolder}/${file}`);
       }
     }
   } catch(err) {
@@ -48,42 +53,31 @@ export async function removeFilesExceptExt(extensions, path) {
   }
 }
 
-export async function checkEmptyFolder(path) {
-  const files = await fs.readdir(path);
+export async function checkEmptyFolder(pathFolder) {
+  const files = await fs.readdir(pathFolder);
   return (files.length === 0)
 }
 
-export async function getFilesFromFolder(path) {
-  const files = await fs.readdir(path);
-  return files.map((file) => {
-    return `${path}/${file}`;
+export async function getFilesFromFolder(pathFolder) {
+  const files = await fs.readdir(pathFolder);
+  const filesFiltered = files.filter(junk.not);
+  return filesFiltered.map((file) => {
+    return `${pathFolder}/${file}`;
   });
 }
 
-export async function checkFolders(path) {
-  let files = await fs.readdir(path);
-  if(files.length >= 3){
-    throw new Error('The folder or file has deeper directories');
-  }
-  if(files.length) {
-    if(files.length === 1 || files.length === 2) {
-      if(files.indexOf('__MACOSX') !== -1) {
-        await fs.delete(`${path}/__MACOSX`);
-      }
-      
-      const newPath = `${path}/${files[0]}`;
-      files = await fs.readdir(newPath);
-
-      return {
-        files,
-        newPath
-      }
+export async function checkFolder(pathFolder) {
+  let files = await fs.readdir(pathFolder);
+  const filesFiltered = files.filter(junk.not);
+  if (filesFiltered.length) {
+    if (filesFiltered.length === 1) {
+      pathFolder = `${pathFolder}/${files[0]}`;
+      files = await fs.readdir(pathFolder);      
     }
-
     return {
       files,
-      [newPath] : path
-    };
+      pathFolder
+    }
   } else {
     throw new Error('The folder or file does not have files');
   }

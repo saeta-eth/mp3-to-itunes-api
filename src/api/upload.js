@@ -7,14 +7,15 @@ import axios from 'axios';
 import {
   decompressedFile,
   checkAverageExtension,
-  removeFilesExceptExt,
-  getFilesFromFolder
+  removeFilesExceptExt
 } from '../lib/util';
 
 import log4js from '../lib/logger';
 const fileName = path.basename(__filename, path.extname(__filename));
-const logger = log4js.getLogger(fileName);
+const logger = log4js.getLogger(fileName)
 
+const pathCompressed = `${process.cwd()}/compressed`;
+const pathDecompressed = `${process.cwd()}/decompressed`;
 
 export default ({ config, db }) => resource({
   
@@ -28,18 +29,20 @@ export default ({ config, db }) => resource({
     const compressedFile = req.files.file;
     const mimetype = compressedFile.mimetype;
     
-    if(mimetype === 'application/zip' || path.extname(compressedFile.name) === '.zip') {
+    if(mimetype === 'application/zip' || path.parse(compressedFile.name).ext === '.zip') {
 
       const newName = uuid.v1();
-      const pathCompressedFile = `${process.cwd()}/compressed/${newName}${path.extname(compressedFile.name)}`;
-      const pathDeCompressedFile = `${process.cwd()}/decompressed/${newName}`;
+
+      const pathCompressedFile = `${pathCompressed}/${newName}${path.parse(compressedFile.name).ext}`;
+      const pathDecompressedFile = `${pathDecompressed}/${newName}`;
+
       compressedFile.mv(pathCompressedFile, async (err) => {
         if (err) {
           logger.error(err);
           return res.status(500).send(err);
         }
         
-        decompressedFile(pathCompressedFile, pathDeCompressedFile, path.extname(compressedFile.name), async (err) => {
+        decompressedFile(pathCompressedFile, pathDecompressedFile, path.parse(compressedFile.name).ext, async (err) => {
           if (err) {
             logger.error(err);
             return res.status(500).send(err);
@@ -66,20 +69,22 @@ export default ({ config, db }) => resource({
   },
 
   async update(req, res) {
-    if (!req.params.upload) {
+    const folderName = req.params.upload;
+    const pathDecompressedFile = `${pathDecompressed}/${folderName}`;
+
+    if (!folderName) {
       return res.status(400).send('No upload id found.');
     }
     
-    const folderName = req.params.upload;
-    const pathDecompressedFile = `${process.cwd()}/decompressed/${folderName}`;
     if (!(await fs.exists(pathDecompressedFile))) {
       return res.status(500).json({
         message: `The ID: ${folderName} is not found.`
       });
     }
 
-    const percentageAcceptedExtensions = await checkAverageExtension(config.extensionAccepted, pathDecompressedFile);
-    if (percentageAcceptedExtensions > config.porcentageAccepted) {
+    const extensionsPercentageAccepted = await checkAverageExtension(config.extensionAccepted, pathDecompressedFile);
+
+    if (extensionsPercentageAccepted > config.porcentageAccepted) {
       // @slorenzo: If is an album, I remove other files with different extension.
       try {
         removeFilesExceptExt(config.extensionAccepted, pathDecompressedFile);
@@ -96,7 +101,7 @@ export default ({ config, db }) => resource({
         ? `${config.baseUrl}:${config.port}/api/upload/${req.params.upload}`
         : `${config.baseUrl}/api/upload/${req.params.upload}`;
 
-      try{
+      try {
         await axios.delete(url);
         return res.status(500).json({
           message: 'The .zip not contains .mp3 files'
