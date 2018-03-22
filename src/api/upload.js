@@ -31,10 +31,10 @@ export default ({ config, db }) => resource({
     
     if(mimetype === 'application/zip' || path.parse(compressedFile.name).ext === '.zip') {
 
-      const newName = uuid.v1();
+      const id = uuid.v1();
 
-      const pathCompressedFile = `${pathCompressed}/${newName}${path.parse(compressedFile.name).ext}`;
-      const pathDecompressedFile = `${pathDecompressed}/${newName}`;
+      const pathCompressedFile = `${pathCompressed}/${id}${path.parse(compressedFile.name).ext}`;
+      const pathDecompressedFile = `${pathDecompressed}/${id}`;
 
       compressedFile.mv(pathCompressedFile, async (err) => {
         if (err) {
@@ -50,12 +50,12 @@ export default ({ config, db }) => resource({
           try {
             // Now does't accept request to port 80. Ignore port in producion environment when build an URL.
             const url = process.env.NODE_ENV === 'development' 
-              ? `${config.baseUrl}:${config.port}/api/upload/${newName}`
-              : `${config.baseUrl}/api/upload/${newName}`;
+              ? `${config.baseUrl}:${config.port}/api/upload/${id}`
+              : `${config.baseUrl}/api/upload/${id}`;
 
             await axios.put(url);
             return res.status(200).json({
-              fileName: newName
+              id: id
             });
           } catch(err) {
             logger.error(err);
