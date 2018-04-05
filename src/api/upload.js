@@ -18,9 +18,8 @@ const pathCompressed = `${process.cwd()}/compressed`;
 const pathDecompressed = `${process.cwd()}/decompressed`;
 
 export default ({ config, db }) => resource({
-  
   id : 'upload',
-
+  /** POST / - Upload .zip file to the server. */
   create(req, res) {
     if (!req.files) {
       return res.status(500).send('No files were uploaded.');
@@ -67,7 +66,7 @@ export default ({ config, db }) => resource({
       return res.status(500).send('The file is not a zip or tar.');
     }
   },
-
+  /** PUT / - Analyze the folder to find possible non-albums files. */
   async update(req, res) {
     const folderName = req.params.upload;
     const pathDecompressedFile = `${pathDecompressed}/${folderName}`;
@@ -113,7 +112,7 @@ export default ({ config, db }) => resource({
     }
   },
 
-  /** DELETE /:id - Delete a given entity */
+  /** DELETE /:id - Delete all related to an ID */
   async delete(req, res) {
     const id = req.params.upload;
     try {
